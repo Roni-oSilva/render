@@ -47,3 +47,4 @@ jobs:
           MONITOR_TRIGGER: ${{ github.event_name == 'workflow_dispatch' && 'manual' || 'schedule' }}
           ONLY_SERVICE_ID: ${{ github.event.inputs.service_id }}
           FORCE_ALL: ${{ github.event.inputs.force == 'true' && 'true' || 'false' }}
+
