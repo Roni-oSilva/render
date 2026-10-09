@@ -1,0 +1,36 @@
+{
+  "name": "render-guardian",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Monitor pessoal de serviços web 24/7 (GitHub Actions + Supabase + painel React)",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "monitor": "tsx src/monitor/main.ts run",
+    "watchdog": "tsx src/monitor/main.ts watchdog"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "recharts": "^2.12.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.0",
+    "@types/react": "^18.3.5",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.41",
+    "tailwindcss": "^3.4.10",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.2",
+    "vitest": "^2.0.5"
+  },
+  "engines": { "node": ">=20" }
+}

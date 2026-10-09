@@ -1,0 +1,49 @@
+name: Monitor
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'   # o GitHub pode atrasar ou pular execuções; veja README
+  workflow_dispatch:
+    inputs:
+      service_id:
+        description: 'ID do serviço (vazio = todos devidos)'
+        required: false
+        default: ''
+      force:
+        description: 'Ignorar intervalos e verificar todos agora'
+        type: boolean
+        default: true
+
+# Evita execuções simultâneas (além do lease no banco)
+concurrency:
+  group: render-guardian-monitor
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Executar verificações
+        run: npm run monitor
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          GENERIC_WEBHOOK_URL: ${{ secrets.GENERIC_WEBHOOK_URL }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          ALERT_EMAIL_FROM: ${{ secrets.ALERT_EMAIL_FROM }}
+          ALERT_EMAIL_TO: ${{ secrets.ALERT_EMAIL_TO }}
+          HEARTBEAT_URL: ${{ secrets.HEARTBEAT_URL }}
+          MONITOR_TRIGGER: ${{ github.event_name == 'workflow_dispatch' && 'manual' || 'schedule' }}
+          ONLY_SERVICE_ID: ${{ github.event.inputs.service_id }}
+          FORCE_ALL: ${{ github.event.inputs.force == 'true' && 'true' || 'false' }}
