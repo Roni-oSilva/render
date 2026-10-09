@@ -73,6 +73,19 @@ npm run typecheck && npm test && npm run build
 SUPABASE_URL=… SUPABASE_SERVICE_ROLE_KEY=… npm run monitor
 ```
 
+## Agendamento confiável (recomendado): gatilho externo
+
+O cron do GitHub pode demorar horas para começar e atrasar depois. Para execuções realmente a cada 5 min, use um serviço gratuito que chame o workflow:
+
+1. GitHub → Settings → Developer settings → Personal access tokens → **Fine-grained tokens** → *Generate*: acesso só ao repositório `render`, permissão **Actions: Read and write**. Copie o token.
+2. Em <https://cron-job.org> (grátis) crie um cron job a cada 5 minutos:
+   - URL: `https://api.github.com/repos/SEU-USUARIO/render/actions/workflows/monitor.yml/dispatches`
+   - Método: **POST**; corpo: `{"ref":"main"}`
+   - Cabeçalhos: `Authorization: Bearer SEU_TOKEN`, `Accept: application/vnd.github+json`, `Content-Type: application/json`
+3. Espere 5 min: aparece uma execução `workflow_dispatch` em Actions → Monitor. Os intervalos de cada serviço continuam respeitados (só “force” ignora).
+
+O cron do GitHub continua ativo como reserva; o lease no banco impede execuções duplicadas. Guarde o token só no cron-job.org.
+
 ## Limitações reais (leia)
 - **Sem garantia de 24/7 nem de “exatamente a cada 5 min”.** O cron do GitHub Actions é *best effort*: atrasos de vários minutos em horários de pico são comuns, execuções podem ser puladas, e o intervalo mínimo é 5 min. Intervalos curtos são nominais.
 - Em repositório **público**, o GitHub **desativa workflows agendados após 60 dias sem atividade** no repositório; faça um commit/ação ocasional ou reative em Actions.

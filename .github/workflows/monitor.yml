@@ -10,9 +10,9 @@ on:
         required: false
         default: ''
       force:
-        description: 'Ignorar intervalos e verificar todos agora'
+        description: 'Ignorar intervalos e verificar todos agora (use ao rodar manualmente)'
         type: boolean
-        default: true
+        default: false
 
 # Evita execuções simultâneas (além do lease no banco)
 concurrency:
