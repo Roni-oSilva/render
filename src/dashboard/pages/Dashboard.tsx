@@ -6,7 +6,15 @@ import { HEALTH_UI, fmtDateTime, fmtDuration, fmtShort, serviceHealth } from '..
 import { evaluateHealth } from '../../monitor/watchdog';
 
 const PERIODS = [['24 horas', 1], ['7 dias', 7], ['30 dias', 30]] as const;
-const CRON_MINUTES = 5; // deve coincidir com .github/workflows/monitor.yml
+const CRON_MINUTES = 5;
+
+/** Deduz o repositório a partir de https://USUARIO.github.io/REPO/ (ou VITE_GITHUB_REPO=usuario/repo). */
+function workflowUrl(): string | null {
+  const env = import.meta.env.VITE_GITHUB_REPO as string | undefined;
+  const m = location.hostname.match(/^([^.]+)\.github\.io$/);
+  const repo = env || (m ? `${m[1]}/${location.pathname.split('/')[1] ?? ''}` : '');
+  return /^[\w.-]+\/[\w.-]+$/.test(repo) ? `https://github.com/${repo}/actions/workflows/monitor.yml` : null;
+} // deve coincidir com .github/workflows/monitor.yml
 
 function Stat({ label, value, tone = '' }: { label: string; value: string | number; tone?: string }) {
   return <div className="card"><div className="text-xs text-slate-500">{label}</div><div className={`mt-1 text-2xl font-semibold ${tone}`}>{value}</div></div>;
@@ -48,7 +56,12 @@ export default function Dashboard() {
         <span>Última execução: <b>{fmtDateTime(run.data?.started_at ?? null)}</b> ({run.data?.status ?? '—'})</span>
         <span>Duração: <b>{fmtDuration(run.data?.duration_ms ?? null)}</b></span>
         <span>Próxima (estimada): <b>{fmtDateTime(nextEst)}</b></span>
-        <span className="text-xs text-slate-500">Status do monitor ≠ status dos sites. O agendador do GitHub pode atrasar.</span>
+        {workflowUrl() && (
+          <a className="btn-primary ml-auto" href={workflowUrl()!} target="_blank" rel="noopener noreferrer">▶ Rodar verificação agora</a>
+        )}
+        <span className="w-full text-xs text-slate-500">
+          Status do monitor ≠ status dos sites. O agendador do GitHub pode atrasar. No botão: <b>Run workflow</b> → marque “Ignorar intervalos” → <b>Run workflow</b> (verde). O painel atualiza sozinho em ~1 min.
+        </span>
       </div>
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
